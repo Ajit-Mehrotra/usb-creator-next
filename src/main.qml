@@ -1240,10 +1240,7 @@ ApplicationWindow {
             property string description: model.description
             property string device: model.device
             property string size: model.size
-            property string guid: model.guid
-            property bool guidValid: model.guidValid
 
-            enabled: guidValid
 
             Rectangle {
                id: dstbgrect
@@ -1280,9 +1277,11 @@ ApplicationWindow {
                     width: parent.parent.width-64
                     ColumnLayout {
                         spacing: 1
+
+                        // Text for storage name and size
                         Text {
                             textFormat: Text.StyledText
-                            height: parent.parent.parent.parent.height / 3
+                            height: parent.parent.parent.parent.height / 2
                             //verticalAlignment: Text.AlignVCenter
                             font.family: roboto.name
                             font.pixelSize: 14
@@ -1295,9 +1294,11 @@ ApplicationWindow {
                             opacity: enabled ? 1.0 : 0.3
                             Layout.topMargin: 5
                         }
+
+                        // Text for storage mount location (also if storage device is read-only)
                         Text {
                             textFormat: Text.StyledText
-                            height: parent.parent.parent.parent.height / 3
+                            height: parent.parent.parent.parent.height / 2
                             //verticalAlignment: Text.AlignVCenter
                             font.family: roboto.name
                             font.pixelSize: 12
@@ -1314,25 +1315,6 @@ ApplicationWindow {
                             color: dstbgrect.mouseOver ? UnColors.darkGray : "white"
                             opacity: enabled ? 1.0 : 0.3
                             anchors.topMargin: 10
-                        }
-                        Text {
-                            textFormat: Text.StyledText
-                            height: parent.parent.parent.parent.height / 3
-                            //verticalAlignment: Text.AlignVCenter
-                            font.family: roboto.name
-                            font.pixelSize: 12
-                            text: {
-                                var txt = ""
-                                if(guid != "") {
-                                    txt += "GUID: %1".arg(guid)
-                                    if(!guidValid)  txt += " <font color='red'>[BLACKLISTED - Choose Another Flash Device]</font>"
-                                } else {
-                                    txt += "<font color='red'>[MISSING GUID - Choose Another Flash Device]</font>"
-                                }
-                                return txt;
-                            }
-                            color: dstbgrect.mouseOver ? UnColors.darkGray : "white"
-                            opacity: enabled ? 1.0 : 0.3
                         }
                     }
                 }
@@ -1796,8 +1778,6 @@ ApplicationWindow {
                         device: drive,
                         description: driveListModel.data(driveListModel.index(i,0), 0x102),
                         size: driveListModel.data(driveListModel.index(i,0), 0x103),
-                        guid: driveListModel.data(driveListModel.index(i,0), 0x108),
-                        guidValid: driveListModel.data(driveListModel.index(i,0), 0x109),
                         readonly: false
                     })
                     break
@@ -1950,12 +1930,7 @@ ApplicationWindow {
             }
         } else {
             imageWriter.setSrc(d.url, d.image_download_size, d.extract_size, typeof(d.extract_sha256) != "undefined" ? d.extract_sha256 : "", typeof(d.contains_multiple_files) != "undefined" ? d.contains_multiple_files : false, ospopup.categorySelected, d.name, typeof(d.init_format) != "undefined" ? d.init_format : "")
-            if(imageWriter.getInitFormat() === "UNRAID" && imageWriter.getDstDevice() !== "" && !imageWriter.getDstGuidValid()) {
-                onError(qsTr("Selected device cannot be used to create an Unraid USB due to its invalid GUID."))
-                writebutton.enabled = false
-                imageWriter.setDst("", false)
-                dstbutton.text = qsTr("CHOOSE STORAGE")
-            }
+
             osbutton.text = d.name
             ospopup.close()
             osswipeview.decrementCurrentIndex()
@@ -1971,14 +1946,8 @@ ApplicationWindow {
             return
         }
 
-        if(imageWriter.getInitFormat() === "UNRAID" && !d.guidValid) {
-            onError(qsTr("Selected device cannot be used to create an Unraid USB due to its invalid GUID."))
-            writebutton.enabled = false
-            return
-        }
-
         dstpopup.close()
-        imageWriter.setDst(d.device, d.guidValid, d.size)
+        imageWriter.setDst(d.device, d.size)
         dstbutton.text = d.description
         if (imageWriter.readyToWrite()) {
             writebutton.enabled = true

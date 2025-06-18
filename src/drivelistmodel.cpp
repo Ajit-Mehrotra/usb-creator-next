@@ -8,9 +8,6 @@
 #include <QSet>
 #include <QDebug>
 #include <QUrl>
-#include "unraidguidvalidator.h"
-
-#include <string>
 
 
 DriveListModel::DriveListModel(QObject *parent)
@@ -24,8 +21,6 @@ DriveListModel::DriveListModel(QObject *parent)
         {isScsiRole, "isScsi"},
         {isReadOnlyRole, "isReadOnly"},
         {mountpointsRole, "mountpoints"},
-        {guidRole, "guid"},
-        {guidValidRole, "guidValid"}
     };
 
     // Enumerate drives in seperate thread, but process results in UI thread
@@ -62,7 +57,6 @@ void DriveListModel::processDriveList(std::vector<Drivelist::DeviceDescriptor> l
     bool filterSystemDrives = DRIVELIST_FILTER_SYSTEM_DRIVES;
     QSet<QString> drivesInNewList;
     
-    UnraidGuidValidator unraidGuidValidator;
 
     for (auto &i: l)
     {
@@ -105,8 +99,7 @@ void DriveListModel::processDriveList(std::vector<Drivelist::DeviceDescriptor> l
                 changes = true;
             }
 
-            auto result = unraidGuidValidator.checkDevice(i);
-            _drivelist[deviceNamePlusSize] = new DriveListItem(QString::fromStdString(i.device), QString::fromStdString(i.description), i.size, result.guid, result.guidValid, i.isUSB, i.isSCSI, i.isReadOnly, mountpoints, this);
+            _drivelist[deviceNamePlusSize] = new DriveListItem(QString::fromStdString(i.device), QString::fromStdString(i.description), i.size, i.isUSB, i.isSCSI, i.isReadOnly, mountpoints, this);
         }
     }
 
