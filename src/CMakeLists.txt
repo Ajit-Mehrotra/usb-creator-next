@@ -5,6 +5,8 @@ cmake_minimum_required(VERSION 3.9.4)
 OPTION (ENABLE_CHECK_VERSION "Check for version updates" ON)
 OPTION (ENABLE_TELEMETRY "Enable sending telemetry" OFF)
 OPTION (DRIVELIST_FILTER_SYSTEM_DRIVES "Filter System drives from displayed drives" ON)
+OPTION (BUILD_MACOS_BUNDLE "Build as macOS app bundle" ON)
+
 
 project(unraid-usb-creator LANGUAGES CXX C)
 set(IMAGER_VERSION_MAJOR 1)
@@ -279,17 +281,18 @@ elseif(APPLE)
     find_library(Security Security)
     find_library(IOKit IOKit)
     set(EXTRALIBS ${EXTRALIBS} ${CoreFoundation} ${DiskArbitration} ${Security} ${Cocoa} ${IOKit})
-    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE YES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/mac/Info.plist.in)
+       if(BUILD_MACOS_BUNDLE)
+        set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE YES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/mac/Info.plist.in)
+        
+        find_program(MACDEPLOYQT "macdeployqt" PATHS "${${QT}_DIR}/../../../bin")
+        if (NOT MACDEPLOYQT)
+            message(FATAL_ERROR "Unable to locate macdeployqt")
+        endif()
 
-    find_program(MACDEPLOYQT "macdeployqt" PATHS "${${QT}_DIR}/../../../bin")
-    if (NOT MACDEPLOYQT)
-        message(FATAL_ERROR "Unable to locate macdeployqt")
+        add_custom_command(TARGET ${PROJECT_NAME}
+            POST_BUILD
+            COMMAND "${MACDEPLOYQT}" "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app" -qmldir="${CMAKE_CURRENT_SOURCE_DIR}")
     endif()
-
-    add_custom_command(TARGET ${PROJECT_NAME}
-        POST_BUILD
-        COMMAND "${MACDEPLOYQT}" "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app" -qmldir="${CMAKE_CURRENT_SOURCE_DIR}")
-
 else()
     find_package(CURL 7.32.0 REQUIRED)
     find_package(LibArchive 3.2.0 REQUIRED)

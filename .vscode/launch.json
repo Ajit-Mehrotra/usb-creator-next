@@ -1,0 +1,60 @@
+{
+
+   
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Unraid USB Creator",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/unraid-usb-creator",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build",
+            "environment": [
+                {
+                     // Adjust to your paths
+                    "name": "DYLD_FRAMEWORK_PATH",
+                    "value": "/Users/ajitmehrotra/Qt/5.15.19/macos/lib"
+                },
+                {
+                     // Adjust to your paths
+                    "name": "QT_QPA_PLATFORM_PLUGIN_PATH",
+                    "value": "/Users/ajitmehrotra/Qt/5.15.19/macos/plugins"
+                }
+            ],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for lldb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "Run Unraid USB Creator (Release)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/unraid-usb-creator",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build",
+            "environment": [
+                {
+                     // Adjust to your paths
+                    "name": "DYLD_FRAMEWORK_PATH",
+                    "value": "/Users/ajitmehrotra/Qt/5.15.19/macos/lib"
+                },
+                {
+                     // Adjust to your paths
+                    "name": "QT_QPA_PLATFORM_PLUGIN_PATH",
+                    "value": "/Users/ajitmehrotra/Qt/5.15.19/macos/plugins"
+                }
+            ],
+            "externalConsole": false,
+            "MIMode": "lldb"
+        }
+    ]
+}
